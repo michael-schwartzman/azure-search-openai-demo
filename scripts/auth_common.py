@@ -1,5 +1,7 @@
 import os
 from typing import Dict, Optional
+import aiohttp
+
 
 import aiohttp
 from azure.core.credentials_async import AsyncTokenCredential
@@ -12,15 +14,20 @@ async def get_auth_headers(credential: AsyncTokenCredential):
     return {"Authorization": f"Bearer {token_result.token}"}
 
 
+
 async def get_application(auth_headers: Dict[str, str], app_id: str) -> Optional[str]:
-    async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
-        async with session.get(f"https://graph.microsoft.com/v1.0/applications(appId='{app_id}')") as response:
-            if response.status == 200:
-                response_json = await response.json()
-                return response_json["id"]
+    try:
+        async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+            async with session.get(f"https://graph.microsoft.com/v1.0/applications(appId='{app_id}')") as response:
+                if response.status == 200:
+                    response_json = await response.json()
+                    return response_json["id"]
+                else:
+                    print(f"Request failed with status code {response.status}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     return None
-
 
 async def update_application(auth_headers: Dict[str, str], object_id: str, app_payload: object):
     async with aiohttp.ClientSession(headers=auth_headers, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
