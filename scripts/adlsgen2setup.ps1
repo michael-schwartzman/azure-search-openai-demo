@@ -1,4 +1,5 @@
 ## Set the preference to stop on the first error
+#test
 $ErrorActionPreference = "Stop"
 
 & $PSScriptRoot\loadenv.ps1
